@@ -4,7 +4,7 @@
 require_once __DIR__ . '/../../config/database.php';
 
 function findAllPatients($conn) {
-    $query = "SELECT * FROM patients";
+    $query = "SELECT Patient_ID, F_name, L_name, DOB, Gender, Address, Email, Username FROM Patient";
     $result = mysqli_query($conn, $query);
     
     $patients = [];
@@ -20,7 +20,7 @@ function findAllPatients($conn) {
 
 function findPatientById($conn, $id) {
     $id = mysqli_real_escape_string($conn, $id);
-    $query = "SELECT * FROM patients WHERE id = '$id'";
+    $query = "SELECT Patient_ID, F_name, L_name, DOB, Gender, Address, Email, Username FROM Patient WHERE Patient_ID = '$id'";
     $result = mysqli_query($conn, $query);
     
     $patient = null;
@@ -33,15 +33,20 @@ function findPatientById($conn, $id) {
 }
 
 function insertPatient($conn, $data) {
-    $first_name = mysqli_real_escape_string($conn, $data['first_name']);
-    $last_name = mysqli_real_escape_string($conn, $data['last_name']);
-    $email = mysqli_real_escape_string($conn, $data['email']);
-    $phone = mysqli_real_escape_string($conn, $data['phone']);
-    $date_of_birth = mysqli_real_escape_string($conn, $data['date_of_birth']);
+    $f_name = mysqli_real_escape_string($conn, $data['f_name']);
+    $l_name = mysqli_real_escape_string($conn, $data['l_name']);
+    $dob = mysqli_real_escape_string($conn, $data['dob']);
+    $gender = mysqli_real_escape_string($conn, $data['gender']);
     $address = mysqli_real_escape_string($conn, $data['address']);
+    $email = mysqli_real_escape_string($conn, $data['email']);
+    $username = mysqli_real_escape_string($conn, $data['username']);
+    $password = mysqli_real_escape_string($conn, $data['password']);
     
-    $query = "INSERT INTO patients (first_name, last_name, email, phone, date_of_birth, address) 
-              VALUES ('$first_name', '$last_name', '$email', '$phone', '$date_of_birth', '$address')";
+    // Hash the password before storing
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    
+    $query = "INSERT INTO Patient (F_name, L_name, DOB, Gender, Address, Email, Username, Password) 
+              VALUES ('$f_name', '$l_name', '$dob', '$gender', '$address', '$email', '$username', '$hashed_password')";
     
     if (mysqli_query($conn, $query)) {
         return mysqli_insert_id($conn);
@@ -51,21 +56,31 @@ function insertPatient($conn, $data) {
 
 function updatePatientById($conn, $id, $data) {
     $id = mysqli_real_escape_string($conn, $id);
-    $first_name = mysqli_real_escape_string($conn, $data['first_name']);
-    $last_name = mysqli_real_escape_string($conn, $data['last_name']);
-    $email = mysqli_real_escape_string($conn, $data['email']);
-    $phone = mysqli_real_escape_string($conn, $data['phone']);
-    $date_of_birth = mysqli_real_escape_string($conn, $data['date_of_birth']);
+    $f_name = mysqli_real_escape_string($conn, $data['f_name']);
+    $l_name = mysqli_real_escape_string($conn, $data['l_name']);
+    $dob = mysqli_real_escape_string($conn, $data['dob']);
+    $gender = mysqli_real_escape_string($conn, $data['gender']);
     $address = mysqli_real_escape_string($conn, $data['address']);
+    $email = mysqli_real_escape_string($conn, $data['email']);
+    $username = mysqli_real_escape_string($conn, $data['username']);
     
-    $query = "UPDATE patients 
-              SET first_name = '$first_name',
-                  last_name = '$last_name',
-                  email = '$email',
-                  phone = '$phone',
-                  date_of_birth = '$date_of_birth',
-                  address = '$address'
-              WHERE id = '$id'";
+    // Only update password if it's provided
+    $passwordUpdate = '';
+    if (isset($data['password']) && !empty($data['password'])) {
+        $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
+        $passwordUpdate = ", Password = '$hashed_password'";
+    }
+    
+    $query = "UPDATE Patient 
+              SET F_name = '$f_name',
+                  L_name = '$l_name',
+                  DOB = '$dob',
+                  Gender = '$gender',
+                  Address = '$address',
+                  Email = '$email',
+                  Username = '$username'
+                  $passwordUpdate
+              WHERE Patient_ID = '$id'";
     
     return mysqli_query($conn, $query);
 }

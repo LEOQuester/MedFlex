@@ -2,11 +2,11 @@
 
 require_once __DIR__ . '/database_helper.php';
 
-$host = 'localhost';     // Update these credentials
-$dbname = 'medflex';    // as needed
+$host = 'yamanote.proxy.rlwy.net';     // Update these credentials
+$dbname = 'MedFlex';    // as needed
 $username = 'root';
-$password = '';
-$port = 3306;
+$password = 'tAWjVHKfEHTnQbpNfEYAJDNJKIYPDZoO';
+$port = 45058;
 
 // Create connection
 $conn = mysqli_connect($host, $username, $password, $dbname, $port);

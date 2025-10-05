@@ -3,14 +3,19 @@
 
 require_once __DIR__ . '/../Models/patient.model.php';
 
-function validatePatientData($data) {
+function validatePatientData($data, $isUpdate = false) {
     $errors = [];
-    $required_fields = ['first_name', 'last_name', 'email', 'phone', 'date_of_birth', 'address'];
+    $required_fields = ['f_name', 'l_name', 'dob', 'gender', 'address', 'email', 'username'];
+    
+    // Add password to required fields only for new patients
+    if (!$isUpdate) {
+        $required_fields[] = 'password';
+    }
     
     // Check required fields
     foreach ($required_fields as $field) {
         if (!isset($data[$field]) || empty($data[$field])) {
-            $errors[] = "$field is required";
+            $errors[] = ucfirst(str_replace('_', ' ', $field)) . " is required";
         }
     }
     
@@ -22,9 +27,24 @@ function validatePatientData($data) {
     }
     
     // Validate date if provided
-    if (isset($data['date_of_birth']) && !empty($data['date_of_birth'])) {
-        if (!strtotime($data['date_of_birth'])) {
+    if (isset($data['dob']) && !empty($data['dob'])) {
+        if (!strtotime($data['dob'])) {
             $errors[] = "Invalid date of birth format";
+        }
+    }
+    
+    // Validate gender
+    if (isset($data['gender']) && !empty($data['gender'])) {
+        $validGenders = ['Male', 'Female', 'Other'];
+        if (!in_array($data['gender'], $validGenders)) {
+            $errors[] = "Invalid gender value";
+        }
+    }
+    
+    // Validate password if provided
+    if (isset($data['password']) && !empty($data['password'])) {
+        if (strlen($data['password']) < 6) {
+            $errors[] = "Password must be at least 6 characters long";
         }
     }
     
@@ -122,7 +142,21 @@ function deletePatient($conn, $id) {
 // Helper function for email checks
 function findPatientByEmail($conn, $email) {
     $email = mysqli_real_escape_string($conn, $email);
-    $query = "SELECT * FROM patients WHERE email = '$email'";
+    $query = "SELECT * FROM Patient WHERE Email = '$email'";
+    $result = mysqli_query($conn, $query);
+    
+    $patient = null;
+    if ($result) {
+        $patient = mysqli_fetch_assoc($result);
+        mysqli_free_result($result);
+    }
+    
+    return $patient;
+}
+
+function findPatientByUsername($conn, $username) {
+    $username = mysqli_real_escape_string($conn, $username);
+    $query = "SELECT * FROM Patient WHERE Username = '$username'";
     $result = mysqli_query($conn, $query);
     
     $patient = null;
