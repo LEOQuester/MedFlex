@@ -1,5 +1,5 @@
 <?php
-// Service layer - Handles business logic and validation
+
 
 require_once __DIR__ . '/../Models/patient.model.php';
 
@@ -7,33 +7,33 @@ function validatePatientData($data, $isUpdate = false) {
     $errors = [];
     $required_fields = ['f_name', 'l_name', 'dob', 'gender', 'address', 'email', 'username'];
     
-    // Add password to required fields only for new patients
+    
     if (!$isUpdate) {
         $required_fields[] = 'password';
     }
     
-    // Check required fields
+   
     foreach ($required_fields as $field) {
         if (!isset($data[$field]) || empty($data[$field])) {
             $errors[] = ucfirst(str_replace('_', ' ', $field)) . " is required";
         }
     }
     
-    // Validate email if provided
+  
     if (isset($data['email']) && !empty($data['email'])) {
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = "Invalid email format";
         }
     }
     
-    // Validate date if provided
+  
     if (isset($data['dob']) && !empty($data['dob'])) {
         if (!strtotime($data['dob'])) {
             $errors[] = "Invalid date of birth format";
         }
     }
     
-    // Validate gender
+    
     if (isset($data['gender']) && !empty($data['gender'])) {
         $validGenders = ['Male', 'Female', 'Other'];
         if (!in_array($data['gender'], $validGenders)) {
@@ -41,7 +41,7 @@ function validatePatientData($data, $isUpdate = false) {
         }
     }
     
-    // Validate password if provided
+   
     if (isset($data['password']) && !empty($data['password'])) {
         if (strlen($data['password']) < 6) {
             $errors[] = "Password must be at least 6 characters long";
@@ -74,7 +74,7 @@ function createPatient($conn, $data) {
         throw new Exception($errors[0]);
     }
     
-    // Check if email already exists
+   
     $existingPatient = findPatientByEmail($conn, $data['email']);
     if ($existingPatient) {
         throw new Exception("Email already registered");
@@ -98,13 +98,13 @@ function updatePatient($conn, $id, $data) {
         throw new Exception($errors[0]);
     }
     
-    // Check if patient exists
+ 
     $existingPatient = findPatientById($conn, $id);
     if (!$existingPatient) {
         throw new Exception("Patient not found", 404);
     }
     
-    // Check if email is taken by another patient
+   
     if ($data['email'] !== $existingPatient['email']) {
         $emailPatient = findPatientByEmail($conn, $data['email']);
         if ($emailPatient) {
@@ -125,7 +125,7 @@ function deletePatient($conn, $id) {
         throw new Exception("Invalid patient ID");
     }
     
-    // Check if patient exists
+    
     $existingPatient = findPatientById($conn, $id);
     if (!$existingPatient) {
         throw new Exception("Patient not found", 404);
@@ -139,7 +139,7 @@ function deletePatient($conn, $id) {
     return true;
 }
 
-// Helper function for email checks
+
 function findPatientByEmail($conn, $email) {
     $email = mysqli_real_escape_string($conn, $email);
     $query = "SELECT * FROM Patient WHERE Email = '$email'";

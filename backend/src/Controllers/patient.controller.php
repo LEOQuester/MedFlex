@@ -1,9 +1,9 @@
 <?php
-// Controller layer - Handles HTTP requests and responses
+
 
 require_once __DIR__ . '/../Services/patient.service.php';
 
-// Response helper functions
+
 function sendJSON($response, $data, $status = 200) {
     $response->getBody()->write(json_encode($data));
     return $response
@@ -15,7 +15,7 @@ function sendError($response, $message, $status = 400) {
     return sendJSON($response, ['error' => $message], $status);
 }
 
-// Controller functions
+
 function handleGetAllPatients($request, $response) {
     global $conn;
     try {
